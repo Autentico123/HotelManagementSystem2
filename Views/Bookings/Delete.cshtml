@@ -1,0 +1,191 @@
+@model HotelManagementSystem2.Models.Booking
+
+@{
+    ViewData["Title"] = "Delete Booking";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold text-danger"><i class="bi bi-trash"></i> Delete Booking</h1>
+        <p class="text-muted">Are you sure you want to permanently delete this booking?</p>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirm Deletion</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Warning!</strong> This will permanently delete the booking from the database. This action cannot be undone!
+                </div>
+
+                <h6 class="fw-bold mb-3">Booking Details:</h6>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Booking Number:</strong>
+                        <p class="text-primary fw-bold">@Model.BookingNumber</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong>
+                        <p>
+                            @if (Model.Status == HotelManagementSystem2.Models.BookingStatus.Confirmed)
+                            {
+                                <span class="badge bg-success">Confirmed</span>
+                            }
+                            else if (Model.Status == HotelManagementSystem2.Models.BookingStatus.CheckedIn)
+                            {
+                                <span class="badge bg-primary">Checked In</span>
+                            }
+                            else if (Model.Status == HotelManagementSystem2.Models.BookingStatus.CheckedOut)
+                            {
+                                <span class="badge bg-secondary">Checked Out</span>
+                            }
+                            else if (Model.Status == HotelManagementSystem2.Models.BookingStatus.Cancelled)
+                            {
+                                <span class="badge bg-danger">Cancelled</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">Pending</span>
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-person"></i> Guest Information</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Guest Name:</strong>
+                        <p class="text-muted">@Model.GuestName</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Email:</strong>
+                        <p class="text-muted">@Model.GuestEmail</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Phone:</strong>
+                        <p class="text-muted">@Model.GuestPhone</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-door-open"></i> Booking Details</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Room:</strong>
+                        <p class="text-muted">Room @Model.Room.RoomNumber</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Check-in:</strong>
+                        <p class="text-muted">@Model.CheckInDate.ToString("MMM dd, yyyy")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Check-out:</strong>
+                        <p class="text-muted">@Model.CheckOutDate.ToString("MMM dd, yyyy")</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Nights:</strong>
+                        <p class="text-muted">@((Model.CheckOutDate - Model.CheckInDate).Days)</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Guests:</strong>
+                        <p class="text-muted">@Model.NumberOfGuests</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-cash-coin"></i> Payment Information</h6>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Total Amount:</strong>
+                        <p class="text-success fw-bold">?@Model.TotalAmount.ToString("N2")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Amount Paid:</strong>
+                        <p class="fw-bold">?@Model.AmountPaid.ToString("N2")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Balance:</strong>
+                        <p class="text-danger fw-bold">?@Model.Balance.ToString("N2")</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <hr>
+                    <h6 class="fw-bold mb-2"><i class="bi bi-note-text"></i> Notes</h6>
+                    <p class="text-muted">@Model.Notes</p>
+                }
+
+                <hr class="my-4">
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Are you absolutely sure you want to PERMANENTLY delete this booking? This cannot be undone!')">
+                            <i class="bi bi-trash"></i> Yes, Delete Permanently
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-danger mb-3">
+            <div class="card-header bg-danger text-white">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Danger Zone</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold text-danger">This action will:</h6>
+                <ul class="small">
+                    <li>Permanently delete the booking</li>
+                    <li>Remove from database</li>
+                    <li>Cannot be recovered</li>
+                    <li>Free up the room if reserved</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-lightbulb"></i> Alternative Actions</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold">Instead of deleting:</h6>
+                <ul class="small">
+                    <li><strong>Cancel:</strong> Keeps record, marks as cancelled</li>
+                    <li><strong>Edit:</strong> Modify booking details</li>
+                    <li><strong>Check-out:</strong> Complete the booking normally</li>
+                </ul>
+                <hr>
+                <p class="small mb-0"><strong>Recommended:</strong> Only delete test bookings or incorrect entries.</p>
+            </div>
+        </div>
+    </div>
+</div>

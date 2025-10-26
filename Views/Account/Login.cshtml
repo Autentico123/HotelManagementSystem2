@@ -1,0 +1,62 @@
+@model HotelManagementSystem2.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-building" style="font-size: 3rem; color: #0d6efd;"></i>
+                    <h2 class="fw-bold mt-2">Hotel Management System</h2>
+                    <p class="text-muted">Sign in to your account</p>
+                </div>
+
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Email" class="form-control" id="floatingEmail" placeholder="name@example.com" />
+                        <label for="floatingEmail"><i class="bi bi-envelope"></i> Email address</label>
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control" id="floatingPassword" placeholder="Password" />
+                        <label for="floatingPassword"><i class="bi bi-lock"></i> Password</label>
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" class="form-check-input" id="rememberMe" />
+                        <label class="form-check-label" for="rememberMe">
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3 text-end">
+                        <a asp-action="ForgotPassword" class="text-decoration-none small">
+                            <i class="bi bi-question-circle me-1"></i>Forgot your password?
+                        </a>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
+                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    </button>
+                    
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account? <a asp-action="Register">Register here</a></p>
+                    </div>
+                </form>
+
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

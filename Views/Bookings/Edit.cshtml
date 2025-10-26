@@ -1,0 +1,188 @@
+@model HotelManagementSystem2.Models.Booking
+
+@{
+    ViewData["Title"] = "Edit Booking";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold"><i class="bi bi-pencil"></i> Edit Booking</h1>
+        <p class="text-muted">Update booking details and payment information</p>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Booking: @Model.BookingNumber</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="BookingNumber" />
+                    <input type="hidden" asp-for="CreatedAt" />
+                    <input type="hidden" asp-for="CreatedBy" />
+                    <input type="hidden" asp-for="RoomId" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <h5 class="mb-3 text-primary"><i class="bi bi-person-circle"></i> Guest Information</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GuestName" class="form-label fw-semibold"></label>
+                            <input asp-for="GuestName" class="form-control" />
+                            <span asp-validation-for="GuestName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GuestEmail" class="form-label fw-semibold"></label>
+                            <input asp-for="GuestEmail" class="form-control" type="email" />
+                            <span asp-validation-for="GuestEmail" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GuestPhone" class="form-label fw-semibold"></label>
+                            <input asp-for="GuestPhone" class="form-control" />
+                            <span asp-validation-for="GuestPhone" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="IdentityDocument" class="form-label fw-semibold"></label>
+                            <input asp-for="IdentityDocument" class="form-control" />
+                            <span asp-validation-for="IdentityDocument" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="GuestAddress" class="form-label fw-semibold"></label>
+                        <textarea asp-for="GuestAddress" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="GuestAddress" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="mb-3 text-primary"><i class="bi bi-calendar-week"></i> Booking Details</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="RoomId" class="form-label fw-semibold"></label>
+                            <select asp-for="RoomId" class="form-select" asp-items="ViewBag.RoomId" disabled>
+                            </select>
+                            <small class="text-muted">Room cannot be changed after booking</small>
+                            <span asp-validation-for="RoomId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="CheckInDate" class="form-label fw-semibold"></label>
+                            <input asp-for="CheckInDate" class="form-control" type="date" />
+                            <span asp-validation-for="CheckInDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="CheckOutDate" class="form-label fw-semibold"></label>
+                            <input asp-for="CheckOutDate" class="form-control" type="date" />
+                            <span asp-validation-for="CheckOutDate" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NumberOfGuests" class="form-label fw-semibold"></label>
+                            <input asp-for="NumberOfGuests" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="NumberOfGuests" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Status" class="form-label fw-semibold"></label>
+                            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<HotelManagementSystem2.Models.BookingStatus>()"></select>
+                            <span asp-validation-for="Status" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="mb-3 text-primary"><i class="bi bi-cash-coin"></i> Payment Information</h5>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="TotalAmount" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">&#8369;</span>
+                                <input asp-for="TotalAmount" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="TotalAmount" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="AmountPaid" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">&#8369;</span>
+                                <input asp-for="AmountPaid" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="AmountPaid" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Balance</label>
+                            <div class="input-group">
+                                <span class="input-group-text">&#8369;</span>
+                                <input type="text" class="form-control" value="@((Model.TotalAmount - Model.AmountPaid).ToString("N2"))" readonly />
+                            </div>
+                            <small class="text-muted">Auto-calculated</small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label asp-for="PaymentMethod" class="form-label fw-semibold"></label>
+                            <select asp-for="PaymentMethod" class="form-select">
+                                <option value="">Select Payment Method</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                                <option value="GCash">GCash</option>
+                                <option value="PayMaya">PayMaya</option>
+                            </select>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h5 class="mb-3 text-primary"><i class="bi bi-note-text"></i> Additional Information</h5>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Any special requests or notes..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-save"></i> Update Booking
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Auto-calculate balance when amounts change
+        document.getElementById('TotalAmount').addEventListener('input', calculateBalance);
+        document.getElementById('AmountPaid').addEventListener('input', calculateBalance);
+
+        function calculateBalance() {
+            var total = parseFloat(document.getElementById('TotalAmount').value) || 0;
+            var paid = parseFloat(document.getElementById('AmountPaid').value) || 0;
+            var balance = total - paid;
+            document.querySelector('input[readonly]').value = balance.toFixed(2);
+        }
+    </script>
+}

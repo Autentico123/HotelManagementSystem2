@@ -1,0 +1,452 @@
+@model IEnumerable<HotelManagementSystem2.Models.Room>
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="display-3 fw-bold mb-3 animate-fade-in">Welcome to Our Hotel</h1>
+                <p class="lead mb-4">Experience comfort, luxury, and exceptional service in the heart of the Philippines</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="#available-rooms" class="btn btn-light btn-lg">
+                            <i class="bi bi-search"></i> Browse Rooms
+                        </a>
+                        <a asp-controller="Bookings" asp-action="Index" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-calendar-check"></i> My Bookings
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg">
+                            <i class="bi bi-person-plus"></i> Register Now
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right"></i> Login
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="text-center">
+                    <i class="bi bi-building display-1 opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section mb-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-wifi text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold">Free WiFi</h5>
+                    <p class="text-muted small mb-0">High-speed internet in all rooms</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-shield-check text-success" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold">24/7 Security</h5>
+                    <p class="text-muted small mb-0">Your safety is our priority</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-cup-hot text-warning" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold">Breakfast</h5>
+                    <p class="text-muted small mb-0">Complimentary daily breakfast</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="feature-card text-center p-4">
+                    <div class="feature-icon mb-3">
+                        <i class="bi bi-clock-history text-info" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="fw-bold">24/7 Service</h5>
+                    <p class="text-muted small mb-0">Round-the-clock assistance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Available Rooms Section -->
+<section id="available-rooms" class="rooms-section mb-5">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="display-5 fw-bold mb-2">
+                    <i class="bi bi-door-open text-primary"></i> Available Rooms
+                </h2>
+                <p class="text-muted">Choose from our selection of comfortable and stylish rooms</p>
+            </div>
+        </div>
+
+        @if (ViewBag.AvailableRooms != null && ViewBag.AvailableRooms.Count > 0)
+        {
+            <!-- Room Filter Buttons -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                        <button class="btn btn-outline-primary active" onclick="filterRooms('all')">
+                            <i class="bi bi-grid"></i> All Rooms
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterRooms('Single')">
+                            <i class="bi bi-person"></i> Single
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterRooms('Double')">
+                            <i class="bi bi-people"></i> Double
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterRooms('Suite')">
+                            <i class="bi bi-star"></i> Suite
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4" id="rooms-container">
+                @foreach (var room in ViewBag.AvailableRooms)
+                {
+                    <div class="col-md-6 col-lg-4 room-item" data-room-type="@room.RoomType">
+                        <div class="card h-100 border-0 shadow-sm room-card hover-lift">
+                            @if (!string.IsNullOrEmpty(room.ImageUrl))
+                            {
+                                <div class="position-relative">
+                                    <img src="@room.ImageUrl" class="card-img-top room-image" alt="Room @room.RoomNumber" style="height: 250px; object-fit: cover;" />
+                                    <div class="position-absolute top-0 end-0 m-3">
+                                        <span class="badge bg-success shadow">
+                                            <i class="bi bi-check-circle"></i> Available
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="room-image-placeholder bg-gradient d-flex align-items-center justify-content-center" style="height: 250px;">
+                                    <i class="bi bi-image text-white opacity-50" style="font-size: 4rem;"></i>
+                                </div>
+                            }
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h4 class="card-title fw-bold mb-1">Room @room.RoomNumber</h4>
+                                        <span class="badge bg-primary">@room.RoomType</span>
+                                    </div>
+                                    <span class="badge bg-info-subtle text-info border border-info">
+                                        <i class="bi bi-people-fill"></i> @room.Capacity
+                                    </span>
+                                </div>
+                                
+                                <p class="card-text text-muted mb-3 flex-grow-1">
+                                    @(room.Description?.Length > 100 ? room.Description.Substring(0, 100) + "..." : room.Description)
+                                </p>
+                                
+                                <!-- Amenities Preview -->
+                                <div class="mb-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        @{
+                                            var amenitiesArray = room.Amenities.Split(',');
+                                            var amenitiesCount = amenitiesArray.Length;
+                                            var displayCount = Math.Min(3, amenitiesCount);
+                                            
+                                            for (int i = 0; i < displayCount; i++)
+                                            {
+                                                <span class="badge bg-light text-dark border">
+                                                    <i class="bi bi-check-circle-fill text-success"></i> @amenitiesArray[i].Trim()
+                                                </span>
+                                            }
+                                            
+                                            if (amenitiesCount > 3)
+                                            {
+                                                <span class="badge bg-light text-dark border">
+                                                    +@(amenitiesCount - 3) more
+                                                </span>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-3">
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="price-tag">
+                                            <h3 class="text-primary fw-bold mb-0">&#8369;@room.PricePerNight.ToString("N2")</h3>
+                                            <small class="text-muted">per night</small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        @if (User.Identity?.IsAuthenticated == true)
+                                        {
+                                            <a asp-controller="Bookings" asp-action="Create" asp-route-roomId="@room.Id" 
+                                               class="btn btn-primary btn-book">
+                                                <i class="bi bi-calendar-plus"></i> Book
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="Account" asp-action="Login" 
+                                               class="btn btn-outline-primary btn-book">
+                                                <i class="bi bi-box-arrow-in-right"></i> Login
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info border-0 shadow-sm" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle me-3" style="font-size: 2rem;"></i>
+                            <div>
+                                <h5 class="alert-heading mb-1">No Rooms Available</h5>
+                                <p class="mb-0">All rooms are currently booked. Please check back later or contact us for more information.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <section class="cta-section py-5 bg-light">
+        <div class="container">
+            <div class="card border-0 shadow-lg bg-gradient-primary text-white">
+                <div class="card-body text-center p-5">
+                    <i class="bi bi-stars display-4 mb-3"></i>
+                    <h2 class="fw-bold mb-3">Ready to Experience Luxury?</h2>
+                    <p class="lead mb-4">Join thousands of satisfied guests and book your perfect stay today</p>
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-5">
+                            <i class="bi bi-person-plus"></i> Create Account
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg px-5">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- Why Choose Us Section -->
+<section class="why-choose-section py-5 bg-white">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12 text-center">
+                <h2 class="display-5 fw-bold mb-2">Why Choose Us?</h2>
+                <p class="text-muted">Experience the difference with our exceptional service</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-award text-primary" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Award Winning</h4>
+                    <p class="text-muted">Recognized for excellence in hospitality and customer service</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-geo-alt text-danger" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Prime Location</h4>
+                    <p class="text-muted">Centrally located with easy access to major attractions</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-heart text-danger" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Guest Satisfaction</h4>
+                    <p class="text-muted">4.9/5 rating from thousands of happy guests</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Room filtering function
+        function filterRooms(type) {
+            const rooms = document.querySelectorAll('.room-item');
+            const buttons = document.querySelectorAll('.btn-outline-primary');
+            
+            // Update button states
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if ((type === 'all' && btn.textContent.includes('All Rooms')) ||
+                    btn.textContent.includes(type)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Filter rooms with animation
+            rooms.forEach(room => {
+                if (type === 'all' || room.dataset.roomType === type) {
+                    room.style.display = 'block';
+                    room.style.animation = 'fadeIn 0.5s';
+                } else {
+                    room.style.display = 'none';
+                }
+            });
+        }
+        
+        // Smooth scroll to rooms section
+        document.addEventListener('DOMContentLoaded', function() {
+            const browseButton = document.querySelector('a[href="#available-rooms"]');
+            if (browseButton) {
+                browseButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('available-rooms').scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            }
+        });
+    </script>
+}
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        min-height: 400px;
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 1s ease-in;
+    }
+    
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Feature Cards */
+    .feature-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    /* Room Cards */
+    .room-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .hover-lift:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+    }
+    
+    .room-image {
+        transition: transform 0.3s ease;
+    }
+    
+    .room-card:hover .room-image {
+        transform: scale(1.05);
+    }
+    
+    .room-image-placeholder {
+        background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    }
+    
+    .btn-book {
+        min-width: 100px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-book:hover {
+        transform: scale(1.05);
+    }
+    
+    /* CTA Section */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    }
+    
+    /* Price Tag */
+    .price-tag h3 {
+        font-size: 1.75rem;
+        line-height: 1;
+    }
+    
+    /* Filter Buttons */
+    .btn-outline-primary.active {
+        background-color: #0d6efd;
+        color: white;
+    }
+    
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .hero-section {
+            min-height: 300px;
+        }
+        
+        .display-3 {
+            font-size: 2.5rem;
+        }
+        
+        .display-5 {
+            font-size: 2rem;
+        }
+    }
+    
+    /* Loading animation */
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .room-item {
+        animation: fadeIn 0.5s ease-in;
+    }
+</style>

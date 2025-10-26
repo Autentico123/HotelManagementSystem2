@@ -1,0 +1,121 @@
+@model HotelManagementSystem2.Models.ViewModels.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold"><i class="bi bi-pencil"></i> Edit User</h1>
+        <p class="text-muted">Update user information and role</p>
+    </div>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person-gear"></i> User Information</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label fw-semibold"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control" readonly />
+                        <small class="text-muted">Email cannot be changed</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SelectedRole" class="form-label fw-semibold">Role</label>
+                        <select asp-for="SelectedRole" class="form-select">
+                            <option value="">-- Keep current role(s) --</option>
+                            @foreach (var role in Model.AllRoles)
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                        <small class="text-muted">
+                            Current role(s): 
+                            @foreach (var role in Model.CurrentRoles)
+                            {
+                                <span class="badge bg-secondary">@role</span>
+                            }
+                        </small>
+                        <span asp-validation-for="SelectedRole" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save"></i> Update User
+                        </button>
+                        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">
+                            <i class="bi bi-eye"></i> View Details
+                        </a>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Role Information</h6>
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold">Available Roles:</h6>
+                <ul class="small">
+                    <li><span class="badge bg-danger">Admin</span> - Full access</li>
+                    <li><span class="badge bg-info">Guest</span> - Limited access</li>
+                </ul>
+                <hr>
+                <p class="small mb-0">
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
+                    <strong>Note:</strong> Changing the role will replace all current roles with the selected one.
+                </p>
+            </div>
+        </div>
+
+        <div class="card border-warning mt-3">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0"><i class="bi bi-shield-check"></i> Security</h6>
+            </div>
+            <div class="card-body">
+                <p class="small mb-2">
+                    To change the user's password, use the "Change Password" option from the user details page.
+                </p>
+                <a asp-action="ChangePassword" asp-route-id="@Model.Id" class="btn btn-sm btn-warning w-100">
+                    <i class="bi bi-key"></i> Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
