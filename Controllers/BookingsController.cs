@@ -301,6 +301,54 @@ namespace HotelManagementSystem2.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Bookings/Delete/5
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var booking = await _context.Bookings
+                .Include(b => b.Room)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            return View(booking);
+        }
+
+        // POST: Bookings/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var booking = await _context.Bookings.Include(b => b.Room).FirstOrDefaultAsync(b => b.Id == id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            // Free up the room if it was reserved
+            if (booking.Room != null && booking.Status != BookingStatus.CheckedOut)
+            {
+                booking.Room.Status = RoomStatus.Available;
+                _context.Update(booking.Room);
+            }
+
+            // Permanently delete the booking
+            _context.Bookings.Remove(booking);
+            await _context.SaveChangesAsync();
+            
+            TempData["Success"] = "Booking deleted permanently!";
+            return RedirectToAction(nameof(Index));
+        }
+
         // GET: Bookings/GCashPayment/5
         [HttpGet]
         public async Task<IActionResult> GCashPayment(int? id)
