@@ -79,6 +79,19 @@ namespace HotelManagementSystem2.Models
         [Display(Name = "Payment Method")]
         public string PaymentMethod { get; set; } = string.Empty;
         
+        // GCash Payment Details
+        [Display(Name = "GCash Number")]
+        public string? GCashNumber { get; set; }
+        
+        [Display(Name = "GCash Account Name")]
+        public string? GCashAccountName { get; set; }
+        
+        [Display(Name = "GCash Reference Number")]
+        public string? GCashReferenceNumber { get; set; }
+        
+        [Display(Name = "GCash Payment Date")]
+        public DateTime? GCashPaymentDate { get; set; }
+        
         // Status and tracking
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
         

@@ -1,0 +1,148 @@
+@model IEnumerable<HotelManagementSystem2.Models.GCashPayment>
+
+@{
+    ViewData["Title"] = "Pending GCash Payments";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold">
+            <i class="bi bi-hourglass-split text-warning"></i> Pending GCash Payments
+        </h1>
+        <p class="text-muted">Review and verify customer payments</p>
+    </div>
+    <div>
+        <a asp-action="AllPayments" class="btn btn-outline-primary me-2">
+            <i class="bi bi-list-check"></i> All Payments
+        </a>
+        <span class="badge bg-warning text-dark fs-6">
+            @Model.Count() Pending
+        </span>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row g-4">
+        @foreach (var payment in Model)
+        {
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-warning">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold">
+                                <i class="bi bi-clock-history"></i> Pending Verification
+                            </h6>
+                            <span class="badge bg-dark">
+                                @payment.PaymentDate.ToString("MMM dd, yyyy")
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Booking Info -->
+                        <div class="mb-3 pb-3 border-bottom">
+                            <h6 class="fw-bold text-primary mb-2">
+                                <i class="bi bi-bookmark"></i> Booking Details
+                            </h6>
+                            <div class="row small">
+                                <div class="col-6">
+                                    <strong>Booking #:</strong><br>
+                                    @payment.Booking.BookingNumber
+                                </div>
+                                <div class="col-6">
+                                    <strong>Guest:</strong><br>
+                                    @payment.Booking.GuestName
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <strong>Room:</strong><br>
+                                    @payment.Booking.Room.RoomNumber - @payment.Booking.Room.RoomType
+                                </div>
+                                <div class="col-6 mt-2">
+                                    <strong>Balance:</strong><br>
+                                    <span class="text-danger fw-bold">?@payment.Booking.Balance.ToString("N2")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Details -->
+                        <div class="mb-3 pb-3 border-bottom">
+                            <h6 class="fw-bold text-success mb-2">
+                                <i class="bi bi-cash-coin"></i> Payment Information
+                            </h6>
+                            <div class="row small">
+                                <div class="col-6">
+                                    <strong>Amount:</strong><br>
+                                    <span class="text-success fw-bold fs-5">?@payment.Amount.ToString("N2")</span>
+                                </div>
+                                <div class="col-6">
+                                    <strong>Reference:</strong><br>
+                                    <span class="badge bg-info">@payment.ReferenceNumber</span>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <strong>From:</strong><br>
+                                    @payment.SenderGCashNumber - @payment.SenderAccountName
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <strong>To:</strong><br>
+                                    @payment.ReceiverGCashNumber
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Proof -->
+                        @if (!string.IsNullOrEmpty(payment.ProofImageUrl))
+                        {
+                            <div class="mb-3">
+                                <h6 class="fw-bold mb-2">
+                                    <i class="bi bi-image"></i> Payment Proof
+                                </h6>
+                                <a href="@payment.ProofImageUrl" target="_blank">
+                                    <img src="@payment.ProofImageUrl" alt="Payment Proof" class="img-fluid rounded shadow-sm" style="max-height: 200px; cursor: pointer;" />
+                                </a>
+                                <small class="d-block text-muted mt-1">
+                                    <i class="bi bi-info-circle"></i> Click to view full size
+                                </small>
+                            </div>
+                        }
+
+                        <!-- Notes -->
+                        @if (!string.IsNullOrEmpty(payment.Notes))
+                        {
+                            <div class="alert alert-light border mb-3">
+                                <strong><i class="bi bi-sticky"></i> Notes:</strong><br>
+                                <small>@payment.Notes</small>
+                            </div>
+                        }
+
+                        <!-- Actions -->
+                        <div class="d-grid gap-2">
+                            <a asp-action="Verify" asp-route-id="@payment.Id" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Review & Verify
+                            </a>
+                            <a asp-controller="Bookings" asp-action="Details" asp-route-id="@payment.BookingId" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-eye"></i> View Booking
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light text-muted small">
+                        <i class="bi bi-clock"></i> Submitted: @payment.PaymentDate.ToString("MMM dd, yyyy hh:mm tt")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-check-circle-fill text-success display-1 mb-3"></i>
+            <h4 class="fw-bold mb-2">All Caught Up!</h4>
+            <p class="text-muted mb-4">No pending GCash payments to verify at the moment.</p>
+            <a asp-action="AllPayments" class="btn btn-primary">
+                <i class="bi bi-list-check"></i> View All Payments
+            </a>
+        </div>
+    </div>
+}

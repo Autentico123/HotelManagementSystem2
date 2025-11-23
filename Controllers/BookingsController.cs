@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HotelManagementSystem2.Data;
 using HotelManagementSystem2.Models;
+using HotelManagementSystem2.Models.ViewModels;
 
 namespace HotelManagementSystem2.Controllers
 {
@@ -110,7 +111,7 @@ namespace HotelManagementSystem2.Controllers
                 if (booking.CheckOutDate <= booking.CheckInDate)
                 {
                     ModelState.AddModelError("CheckOutDate", "Check-out date must be after check-in date.");
-                    await LoadRoomsList(booking.RoomId);
+                    LoadRoomsList(booking.RoomId);
                     return View(booking);
                 }
 
@@ -119,7 +120,7 @@ namespace HotelManagementSystem2.Controllers
                 if (room == null || room.Status != RoomStatus.Available)
                 {
                     ModelState.AddModelError("RoomId", "Selected room is not available.");
-                    await LoadRoomsList(booking.RoomId);
+                    LoadRoomsList(booking.RoomId);
                     return View(booking);
                 }
 
@@ -135,7 +136,7 @@ namespace HotelManagementSystem2.Controllers
                 if (hasOverlap)
                 {
                     ModelState.AddModelError("", "Room is already booked for the selected dates.");
-                    await LoadRoomsList(booking.RoomId);
+                    LoadRoomsList(booking.RoomId);
                     return View(booking);
                 }
 
@@ -164,7 +165,7 @@ namespace HotelManagementSystem2.Controllers
                 return RedirectToAction(nameof(Index));
             }
             
-            await LoadRoomsList(booking.RoomId);
+            LoadRoomsList(booking.RoomId);
             return View(booking);
         }
 
@@ -198,7 +199,10 @@ namespace HotelManagementSystem2.Controllers
                 return NotFound();
             }
 
-            // Remove validation for navigation properties
+            // Remove ModelState validation for auto-generated fields
+            ModelState.Remove("BookingNumber");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("CreatedBy");
             ModelState.Remove("Room");
 
             if (ModelState.IsValid)
@@ -208,7 +212,6 @@ namespace HotelManagementSystem2.Controllers
                     booking.Balance = booking.TotalAmount - booking.AmountPaid;
                     _context.Update(booking);
                     await _context.SaveChangesAsync();
-                    TempData["Success"] = "Booking updated successfully!";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -221,10 +224,10 @@ namespace HotelManagementSystem2.Controllers
                         throw;
                     }
                 }
+                TempData["Success"] = "Booking updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
-            
-            ViewData["RoomId"] = new SelectList(await _context.Rooms.Where(r => r.IsActive).ToListAsync(), "Id", "RoomNumber", booking.RoomId);
+            LoadRoomsList(booking.RoomId);
             return View(booking);
         }
 
@@ -289,25 +292,18 @@ namespace HotelManagementSystem2.Controllers
                 return NotFound();
             }
 
-            if (booking.Status != BookingStatus.CheckedOut && booking.Status != BookingStatus.Cancelled)
-            {
-                booking.Status = BookingStatus.Cancelled;
-                if (booking.Room.Status == RoomStatus.Reserved || booking.Room.Status == RoomStatus.Occupied)
-                {
-                    booking.Room.Status = RoomStatus.Available;
-                }
-                
-                _context.Update(booking);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Booking cancelled successfully!";
-            }
-
-            return RedirectToAction(nameof(Details), new { id });
+            booking.Status = BookingStatus.Cancelled;
+            booking.Room.Status = RoomStatus.Available;
+            
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Booking cancelled successfully!";
+            
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Bookings/Delete/5
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Delete(int? id)
+        // GET: Bookings/GCashPayment/5
+        [HttpGet]
+        public async Task<IActionResult> GCashPayment(int? id)
         {
             if (id == null)
             {
@@ -316,61 +312,120 @@ namespace HotelManagementSystem2.Controllers
 
             var booking = await _context.Bookings
                 .Include(b => b.Room)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            
+                .FirstOrDefaultAsync(b => b.Id == id);
+
             if (booking == null)
             {
                 return NotFound();
             }
 
-            return View(booking);
-        }
-
-        // POST: Bookings/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var booking = await _context.Bookings
-                .Include(b => b.Room)
-                .FirstOrDefaultAsync(b => b.Id == id);
-                
-            if (booking != null)
+            // Check authorization - only admin or booking creator can pay
+            if (!User.IsInRole("Admin") && booking.CreatedBy != User.Identity?.Name)
             {
-                // Release room if it's reserved or occupied by this booking
-                if (booking.Room != null && 
-                    (booking.Room.Status == RoomStatus.Reserved || booking.Room.Status == RoomStatus.Occupied) &&
-                    (booking.Status == BookingStatus.Confirmed || booking.Status == BookingStatus.Pending || booking.Status == BookingStatus.CheckedIn))
-                {
-                    booking.Room.Status = RoomStatus.Available;
-                    _context.Update(booking.Room);
-                }
-
-                _context.Bookings.Remove(booking);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Booking deleted successfully!";
+                return Forbid();
             }
 
-            return RedirectToAction(nameof(Index));
+            var model = new GCashPaymentViewModel
+            {
+                BookingId = booking.Id,
+                BookingNumber = booking.BookingNumber,
+                TotalAmount = booking.TotalAmount,
+                AmountPaid = booking.AmountPaid,
+                RemainingBalance = booking.Balance,
+                GuestName = booking.GuestName,
+                Amount = booking.Balance, // Default to remaining balance
+                GCashNumber = booking.GuestPhone // Pre-fill with guest phone
+            };
+
+            return View(model);
+        }
+
+        // POST: Bookings/GCashPayment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> GCashPayment(GCashPaymentViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var booking = await _context.Bookings.FindAsync(model.BookingId);
+                if (booking == null)
+                {
+                    return NotFound();
+                }
+
+                // Check authorization
+                if (!User.IsInRole("Admin") && booking.CreatedBy != User.Identity?.Name)
+                {
+                    return Forbid();
+                }
+
+                // Validate payment amount
+                if (model.Amount > booking.Balance)
+                {
+                    ModelState.AddModelError("Amount", "Payment amount cannot exceed the remaining balance.");
+                    
+                    // Repopulate view model
+                    model.BookingNumber = booking.BookingNumber;
+                    model.TotalAmount = booking.TotalAmount;
+                    model.AmountPaid = booking.AmountPaid;
+                    model.RemainingBalance = booking.Balance;
+                    model.GuestName = booking.GuestName;
+                    
+                    return View(model);
+                }
+
+                // Update booking with GCash payment
+                booking.AmountPaid += model.Amount;
+                booking.Balance = booking.TotalAmount - booking.AmountPaid;
+                booking.PaymentMethod = "GCash";
+                booking.GCashNumber = model.GCashNumber;
+                booking.GCashAccountName = model.AccountName;
+                booking.GCashReferenceNumber = model.ReferenceNumber ?? GenerateGCashReference();
+                booking.GCashPaymentDate = DateTime.UtcNow;
+
+                // If fully paid, update status
+                if (booking.Balance <= 0)
+                {
+                    if (booking.Status == BookingStatus.Pending)
+                    {
+                        booking.Status = BookingStatus.Confirmed;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"GCash payment of ?{model.Amount:N2} processed successfully! Reference: {booking.GCashReferenceNumber}";
+                return RedirectToAction(nameof(Details), new { id = booking.Id });
+            }
+
+            // Repopulate view model if validation fails
+            var bookingData = await _context.Bookings.FindAsync(model.BookingId);
+            if (bookingData != null)
+            {
+                model.BookingNumber = bookingData.BookingNumber;
+                model.TotalAmount = bookingData.TotalAmount;
+                model.AmountPaid = bookingData.AmountPaid;
+                model.RemainingBalance = bookingData.Balance;
+                model.GuestName = bookingData.GuestName;
+            }
+
+            return View(model);
+        }
+
+        // Helper method to generate GCash reference number
+        private string GenerateGCashReference()
+        {
+            return $"GCASH{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+        }
+
+        private void LoadRoomsList(int? selectedRoomId = null)
+        {
+            ViewBag.RoomId = new SelectList(_context.Rooms.Where(r => r.IsActive), "Id", "RoomNumber", selectedRoomId);
         }
 
         private bool BookingExists(int id)
         {
             return _context.Bookings.Any(e => e.Id == id);
-        }
-
-        private async Task LoadRoomsList(int? selectedRoomId = null)
-        {
-            var availableRooms = await _context.Rooms
-                .Where(r => r.IsActive && r.Status == RoomStatus.Available)
-                .ToListAsync();
-                
-            ViewData["RoomId"] = new SelectList(
-                availableRooms,
-                "Id",
-                "RoomNumber",
-                selectedRoomId);
         }
     }
 }

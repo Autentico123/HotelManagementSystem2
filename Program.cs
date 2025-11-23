@@ -57,12 +57,17 @@ namespace HotelManagementSystem2
                 var services = scope.ServiceProvider;
                 try
                 {
+                    // Apply any pending migrations automatically
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    context.Database.Migrate();
+                    
+                    // Seed initial data
                     await DbInitializer.Initialize(services);
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
+                    logger.LogError(ex, "An error occurred while migrating or seeding the database.");
                 }
             }
 

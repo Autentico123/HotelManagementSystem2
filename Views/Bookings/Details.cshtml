@@ -140,6 +140,33 @@ else
                     </div>
                 </div>
 
+                @if (Model.PaymentMethod == "GCash" && !string.IsNullOrEmpty(Model.GCashNumber))
+                {
+                    <hr>
+                    <h6 class="fw-bold mb-3 text-primary"><i class="bi bi-phone-fill"></i> GCash Payment Details</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <strong>GCash Number:</strong><br>
+                            <span class="text-monospace">@Model.GCashNumber</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Account Name:</strong><br>
+                            @Model.GCashAccountName
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <strong>Reference Number:</strong><br>
+                            <span class="badge bg-info text-dark">@Model.GCashReferenceNumber</span>
+                        </div>
+                        @if (Model.GCashPaymentDate != null)
+                        {
+                            <div class="col-md-6 mb-2">
+                                <strong>Payment Date:</strong><br>
+                                @Model.GCashPaymentDate.Value.ToString("MMMM dd, yyyy hh:mm tt")
+                            </div>
+                        }
+                    </div>
+                }
+
                 @if (!string.IsNullOrEmpty(Model.Notes))
                 {
                     <hr>
@@ -200,6 +227,13 @@ else
                         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
                             <i class="bi bi-pencil"></i> Edit Booking
                         </a>
+                        
+                        @if (Model.Balance > 0)
+                        {
+                            <a asp-controller="GCashPayments" asp-action="Pay" asp-route-id="@Model.Id" class="btn btn-info">
+                                <i class="bi bi-phone-fill"></i> Pay with GCash
+                            </a>
+                        }
                     }
                     else
                     {
@@ -210,6 +244,13 @@ else
                                     <i class="bi bi-x-circle"></i> Cancel Booking
                                 </button>
                             </form>
+                        }
+                        
+                        @if (Model.Balance > 0 && Model.Status != HotelManagementSystem2.Models.BookingStatus.Cancelled)
+                        {
+                            <a asp-controller="GCashPayments" asp-action="Pay" asp-route-id="@Model.Id" class="btn btn-success btn-lg">
+                                <i class="bi bi-phone-fill"></i> Pay with GCash
+                            </a>
                         }
                     }
 
@@ -252,6 +293,16 @@ else
                     <span class="fw-bold">Balance:</span>
                     <span class="fw-bold @(Model.Balance > 0 ? "text-danger" : "text-success")">&#8369;@Model.Balance.ToString("N2")</span>
                 </div>
+                
+                @if (Model.Balance > 0 && Model.Status != HotelManagementSystem2.Models.BookingStatus.Cancelled)
+                {
+                    <div class="mt-3 d-grid">
+                        <a asp-controller="GCashPayments" asp-action="Pay" asp-route-id="@Model.Id" class="btn btn-success">
+                            <i class="bi bi-phone-fill me-2"></i>Pay Now via GCash
+                        </a>
+                    </div>
+                }
+
             </div>
         </div>
 

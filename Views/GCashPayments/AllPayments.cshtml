@@ -1,0 +1,218 @@
+@model IEnumerable<HotelManagementSystem2.Models.GCashPayment>
+
+@{
+    ViewData["Title"] = "All GCash Payments";
+    Layout = "_AdminLayout";
+    var pendingCount = Model.Count(p => p.Status == HotelManagementSystem2.Models.PaymentStatus.Pending);
+    var verifiedCount = Model.Count(p => p.Status == HotelManagementSystem2.Models.PaymentStatus.Verified);
+    var rejectedCount = Model.Count(p => p.Status == HotelManagementSystem2.Models.PaymentStatus.Rejected);
+    var totalAmount = Model.Where(p => p.Status == HotelManagementSystem2.Models.PaymentStatus.Verified).Sum(p => p.Amount);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 fw-bold">
+            <i class="bi bi-list-check text-primary"></i> All GCash Payments
+        </h1>
+        <p class="text-muted">Complete payment history and management</p>
+    </div>
+    <a asp-action="PendingPayments" class="btn btn-warning">
+        <i class="bi bi-hourglass-split"></i> Pending (@pendingCount)
+    </a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-warning bg-gradient text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">Pending</h6>
+                        <h3 class="mb-0 fw-bold">@pendingCount</h3>
+                    </div>
+                    <i class="bi bi-hourglass-split display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-success bg-gradient text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">Verified</h6>
+                        <h3 class="mb-0 fw-bold">@verifiedCount</h3>
+                    </div>
+                    <i class="bi bi-check-circle display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-danger bg-gradient text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">Rejected</h6>
+                        <h3 class="mb-0 fw-bold">@rejectedCount</h3>
+                    </div>
+                    <i class="bi bi-x-circle display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm bg-primary bg-gradient text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">Total Verified</h6>
+                        <h3 class="mb-0 fw-bold">?@totalAmount.ToString("N2")</h3>
+                    </div>
+                    <i class="bi bi-cash-stack display-4 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payments Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Payment History</h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-primary active" onclick="filterPayments('all')">All</button>
+                <button type="button" class="btn btn-sm btn-outline-warning" onclick="filterPayments('Pending')">Pending</button>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="filterPayments('Verified')">Verified</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="filterPayments('Rejected')">Rejected</button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Booking</th>
+                            <th>Guest</th>
+                            <th>Amount</th>
+                            <th>From</th>
+                            <th>Reference</th>
+                            <th>Status</th>
+                            <th>Verified By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentsTable">
+                        @foreach (var payment in Model)
+                        {
+                            <tr data-status="@payment.Status">
+                                <td class="small">
+                                    @payment.PaymentDate.ToString("MMM dd, yyyy")<br>
+                                    <span class="text-muted">@payment.PaymentDate.ToString("hh:mm tt")</span>
+                                </td>
+                                <td>
+                                    <a asp-controller="Bookings" asp-action="Details" asp-route-id="@payment.BookingId">
+                                        @payment.Booking.BookingNumber
+                                    </a>
+                                </td>
+                                <td>@payment.Booking.GuestName</td>
+                                <td class="fw-bold text-success">?@payment.Amount.ToString("N2")</td>
+                                <td class="small">
+                                    @payment.SenderAccountName<br>
+                                    <span class="text-muted">@payment.SenderGCashNumber</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">@payment.ReferenceNumber</span>
+                                </td>
+                                <td>
+                                    @if (payment.Status == HotelManagementSystem2.Models.PaymentStatus.Pending)
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-clock"></i> Pending
+                                        </span>
+                                    }
+                                    else if (payment.Status == HotelManagementSystem2.Models.PaymentStatus.Verified)
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Verified
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle"></i> Rejected
+                                        </span>
+                                    }
+                                </td>
+                                <td class="small">
+                                    @if (payment.VerifiedBy != null)
+                                    {
+                                        <span>@payment.VerifiedBy</span><br>
+                                        <span class="text-muted">@payment.VerifiedDate?.ToString("MMM dd")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (payment.Status == HotelManagementSystem2.Models.PaymentStatus.Pending)
+                                    {
+                                        <a asp-action="Verify" asp-route-id="@payment.Id" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-check-circle"></i> Verify
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        @if (!string.IsNullOrEmpty(payment.ProofImageUrl))
+                                        {
+                                            <a href="@payment.ProofImageUrl" target="_blank" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-image"></i> Proof
+                                            </a>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <p class="text-muted mt-3">No GCash payments found</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterPayments(status) {
+            const rows = document.querySelectorAll('#paymentsTable tr');
+            const buttons = document.querySelectorAll('.btn-group button');
+            
+            // Update button states
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter rows
+            rows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                if (status === 'all' || rowStatus === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}

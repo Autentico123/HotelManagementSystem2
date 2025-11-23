@@ -1,0 +1,211 @@
+@model HotelManagementSystem2.Models.ViewModels.VerifyPaymentViewModel
+
+@{
+    ViewData["Title"] = "Verify Payment";
+    Layout = "_AdminLayout";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="mb-4">
+                <a asp-action="PendingPayments" class="btn btn-outline-secondary mb-3">
+                    <i class="bi bi-arrow-left"></i> Back to Pending
+                </a>
+                <h2 class="fw-bold">
+                    <i class="bi bi-shield-check text-primary"></i> Verify GCash Payment
+                </h2>
+                <p class="text-muted">Review payment details and approve or reject</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Left Column - Payment Details -->
+                <div class="col-md-7">
+                    <!-- Payment Proof -->
+                    @if (!string.IsNullOrEmpty(Model.Payment?.ProofImageUrl))
+                    {
+                        <div class="card border-0 shadow-lg mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-image me-2"></i>
+                                    Payment Proof Screenshot
+                                </h5>
+                            </div>
+                            <div class="card-body text-center p-4">
+                                <img src="@Model.Payment.ProofImageUrl" alt="Payment Proof" class="img-fluid rounded shadow" style="max-width: 100%;" />
+                                <div class="mt-3">
+                                    <a href="@Model.Payment.ProofImageUrl" target="_blank" class="btn btn-outline-primary">
+                                        <i class="bi bi-zoom-in"></i> View Full Size
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> No payment proof uploaded
+                        </div>
+                    }
+
+                    <!-- Booking Details -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-bookmark me-2"></i>
+                                Booking Information
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Booking Number</small>
+                                    <p class="fw-bold mb-0">@Model.Payment?.Booking.BookingNumber</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Guest Name</small>
+                                    <p class="fw-bold mb-0">@Model.Payment?.Booking.GuestName</p>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <small class="text-muted">Room</small>
+                                    <p class="fw-bold mb-0">@Model.Payment?.Booking.Room.RoomNumber - @Model.Payment?.Booking.Room.RoomType</p>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted">Contact</small>
+                                    <p class="fw-bold mb-0">@Model.Payment?.Booking.GuestPhone</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-4">
+                                    <small class="text-muted">Total Amount</small>
+                                    <p class="fw-bold text-primary mb-0">?@Model.Payment?.Booking.TotalAmount.ToString("N2")</p>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">Already Paid</small>
+                                    <p class="fw-bold text-success mb-0">?@Model.Payment?.Booking.AmountPaid.ToString("N2")</p>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">Balance</small>
+                                    <p class="fw-bold text-danger mb-0">?@Model.Payment?.Booking.Balance.ToString("N2")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Payment Info & Verification -->
+                <div class="col-md-5">
+                    <!-- Payment Details -->
+                    <div class="card border-0 shadow-lg mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-cash-coin me-2"></i>
+                                Payment Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">Amount Sent</small>
+                                <h2 class="fw-bold text-success mb-0">?@Model.Payment?.Amount.ToString("N2")</h2>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-3">
+                                <label class="text-muted small">From (Sender):</label>
+                                <div class="bg-light p-2 rounded">
+                                    <strong>@Model.Payment?.SenderAccountName</strong><br>
+                                    <span class="text-primary">@Model.Payment?.SenderGCashNumber</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="text-muted small">To (Receiver):</label>
+                                <div class="bg-light p-2 rounded">
+                                    <span class="text-primary fw-bold">@Model.Payment?.ReceiverGCashNumber</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="text-muted small">Reference Number:</label>
+                                <div class="bg-light p-2 rounded">
+                                    <span class="badge bg-info">@Model.Payment?.ReferenceNumber</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="text-muted small">Payment Date:</label>
+                                <div class="bg-light p-2 rounded">
+                                    @Model.Payment?.PaymentDate.ToString("MMMM dd, yyyy hh:mm tt")
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(Model.Payment?.Notes))
+                            {
+                                <div class="alert alert-light border">
+                                    <strong><i class="bi bi-sticky"></i> Customer Notes:</strong><br>
+                                    <small>@Model.Payment.Notes</small>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Verification Form -->
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-header bg-warning">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield-check me-2"></i>
+                                Verification Action
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form asp-action="Verify" method="post">
+                                <input asp-for="PaymentId" type="hidden" />
+                                
+                                <div class="mb-4">
+                                    <label asp-for="Notes" class="form-label fw-semibold">
+                                        Verification Notes / Rejection Reason
+                                    </label>
+                                    <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Enter notes or reason for rejection..."></textarea>
+                                    <span asp-validation-for="Notes" class="text-danger small"></span>
+                                </div>
+
+                                <div class="alert alert-info border-0 mb-4">
+                                    <h6 class="alert-heading">
+                                        <i class="bi bi-info-circle me-2"></i>What happens next?
+                                    </h6>
+                                    <ul class="small mb-0">
+                                        <li><strong>If Approved:</strong> Amount will be added to booking, balance updated</li>
+                                        <li><strong>If Rejected:</strong> Payment marked as rejected, customer can resubmit</li>
+                                    </ul>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" name="IsApproved" value="true" class="btn btn-success btn-lg" onclick="return confirm('Are you sure you want to APPROVE this payment of ?@Model.Payment?.Amount.ToString("N2")?')">
+                                        <i class="bi bi-check-circle-fill me-2"></i>
+                                        Approve Payment
+                                    </button>
+                                    <button type="submit" name="IsApproved" value="false" class="btn btn-danger" onclick="return confirm('Are you sure you want to REJECT this payment?')">
+                                        <i class="bi bi-x-circle-fill me-2"></i>
+                                        Reject Payment
+                                    </button>
+                                    <a asp-action="PendingPayments" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
